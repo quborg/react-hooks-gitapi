@@ -1,19 +1,23 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import moment from "moment";
+import InfiniteScroll from "react-infinite-scroller";
 
-const URL =
-  "https://api.github.com/search/repositories?q=created:>2017-10-22&sort=stars&order=desc";
+const URL = (page = 1) =>
+  `https://api.github.com/search/repositories?q=created:>2017-10-22&sort=stars&order=desc&page=${page}`;
 
 const App = () => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    axios.get(URL).then(res => setData(res.data.items));
+    loadPage();
   }, []);
 
+  const loadPage = page =>
+    axios.get(URL(page)).then(res => setData([...data, ...res.data.items]));
+
   return (
-    <Fragment>
+    <InfiniteScroll hasMore loadMore={loadPage}>
       {data.map(item => {
         return (
           <div key={item.id} className="card">
@@ -37,7 +41,7 @@ const App = () => {
           </div>
         );
       })}
-    </Fragment>
+    </InfiniteScroll>
   );
 };
 
